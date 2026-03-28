@@ -1,5 +1,6 @@
-import e, { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken"
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken"
+import { JWT_SECRET } from "@repo/backend-common/config";
 
 
 export function middleware(req: Request, res: Response, next: NextFunction) {
@@ -13,7 +14,7 @@ export function middleware(req: Request, res: Response, next: NextFunction) {
 
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!)
+        const decoded = jwt.verify(token, JWT_SECRET!)
 
         if (typeof decoded == 'string') {
             return
