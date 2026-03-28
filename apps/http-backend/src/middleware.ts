@@ -15,7 +15,11 @@ export function middleware(req: Request, res: Response, next: NextFunction) {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!)
 
-        req.userId = (decoded as JwtPayload).userId
+        if (typeof decoded == 'string') {
+            return
+        }
+
+        req.userId = decoded.userId
         next()
 
     } catch (error) {

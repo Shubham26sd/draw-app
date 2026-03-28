@@ -3,6 +3,7 @@ import z from "zod"
 import jwt from "jsonwebtoken"
 import { middleware } from "./middleware";
 import dotenv from "dotenv"
+import { JWT_SECRET } from "@repo/backend-common/config"
 
 dotenv.config()
 
@@ -25,7 +26,7 @@ app.post("/signin", (req, res) => {
 
     const token = jwt.sign({
         userId: 1,
-    }, process.env.JWT_SECRET!)
+    }, JWT_SECRET!)
 
     return res.json({
         token
