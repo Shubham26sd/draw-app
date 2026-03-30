@@ -47,22 +47,39 @@ app.post("/signup", async (req, res) => {
 })
 
 
-app.post("/signin", (req, res) => {
-    const data = SigninSchema.safeParse(req.body)
-    if (!data.success) {
+app.post("/signin", async (req, res) => {
+    const parsedData = SigninSchema.safeParse(req.body)
+    if (!parsedData.success) {
         return res.json({
             message: "Incorrect inputs"
         })
     }
+
     //db call
+    try {
+        const user = await prismaClient.user.findFirst({
+            where: {
+                email: parsedData.data.email,
+                password: parsedData.data.password
+            }
+        })
 
-    const token = jwt.sign({
-        userId: 1,
-    }, JWT_SECRET!)
+        if (!user) {
+            return res.status(401).json({
+                message: "Not authorized"
+            })
+        }
 
-    return res.json({
-        token
-    })
+        const token = jwt.sign({
+            userId: user.id,
+        }, JWT_SECRET!)
+
+        return res.json({
+            token
+        })
+    } catch (error) {
+
+    }
 })
 app.post("/room", middleware, (req, res) => {
     const data = CreateRoomSchema.safeParse(req.body)
