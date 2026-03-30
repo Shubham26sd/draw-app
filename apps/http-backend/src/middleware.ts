@@ -5,7 +5,7 @@ import { JWT_SECRET } from "@repo/backend-common/config";
 
 export function middleware(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers["authorization"]
-    const token = authHeader?.split("")[1]
+    const token = authHeader?.split(" ")[1]
     if (!token) {
         return res.json({
             message: "Auth header missing"

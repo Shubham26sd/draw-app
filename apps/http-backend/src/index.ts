@@ -23,7 +23,7 @@ app.post("/signup", async (req, res) => {
     //db call
     try {
         const hashedPassword = await bcrypt.hash(parsedData.data.password, 10)
-        
+
         const user = await prismaClient.user.create({
             data: {
                 email: parsedData.data.email,
@@ -31,7 +31,7 @@ app.post("/signup", async (req, res) => {
                 name: parsedData.data.name,
             }
         })
-        
+
         const token = jwt.sign({
             userId: user.id
         }, JWT_SECRET!)
@@ -92,17 +92,33 @@ app.post("/signin", async (req, res) => {
     }
 })
 
-app.post("/room", middleware, (req, res) => {
-    const data = CreateRoomSchema.safeParse(req.body)
-    if (!data.success) {
+app.post("/room", middleware, async (req, res) => {
+    const parsedData = CreateRoomSchema.safeParse(req.body)
+    if (!parsedData.success) {
         return res.json({
             message: "Incorrect inputs"
         })
     }
 
-    return res.json({
-        roomId: 123
-    })
+    const userId = req.userId
+    //db call
+    try {
+        const room = await prismaClient.room.create({
+            data: {
+                slug: parsedData.data.name,
+                adminId: userId,
+            }
+        })
+
+        return res.json({
+            roomId: room.id
+        })
+    } catch (error) {
+        return res.status(411).json({
+            message: "Room name already exists with this name"
+        })
+    }
+
 })
 
 app.listen(3001);
