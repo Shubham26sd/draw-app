@@ -5,6 +5,7 @@ import { middleware } from "./middleware";
 import { JWT_SECRET } from "@repo/backend-common/config"
 import { CreateRoomSchema, CreateUserSchema, SigninSchema } from "@repo/common/types"
 import { prismaClient } from "@repo/db/client"
+import bcrypt from "bcrypt"
 
 
 const app = express();
@@ -19,12 +20,15 @@ app.post("/signup", async (req, res) => {
         })
     }
 
+    const hashedPassword = await bcrypt.hash(parsedData.data.password, 10)
+
     //db call
     try {
+        const hashedPassword = await bcrypt.hash(parsedData.data.password, 10)
         const user = await prismaClient.user.create({
             data: {
                 email: parsedData.data.email,
-                password: parsedData.data.password,
+                password: hashedPassword,
                 name: parsedData.data.name,
             }
         })
