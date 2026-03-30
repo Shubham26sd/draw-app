@@ -5,7 +5,7 @@ import { middleware } from "./middleware";
 import { JWT_SECRET } from "@repo/backend-common/config"
 import { CreateRoomSchema, CreateUserSchema, SigninSchema } from "@repo/common/types"
 import { prismaClient } from "@repo/db/client"
-import bcrypt from "bcrypt"
+import bcrypt, { hash } from "bcrypt"
 
 
 const app = express();
@@ -20,11 +20,10 @@ app.post("/signup", async (req, res) => {
         })
     }
 
-    const hashedPassword = await bcrypt.hash(parsedData.data.password, 10)
-
     //db call
     try {
         const hashedPassword = await bcrypt.hash(parsedData.data.password, 10)
+        
         const user = await prismaClient.user.create({
             data: {
                 email: parsedData.data.email,
@@ -32,6 +31,7 @@ app.post("/signup", async (req, res) => {
                 name: parsedData.data.name,
             }
         })
+        
         const token = jwt.sign({
             userId: user.id
         }, JWT_SECRET!)
@@ -57,16 +57,24 @@ app.post("/signin", async (req, res) => {
 
     //db call
     try {
+
         const user = await prismaClient.user.findFirst({
             where: {
-                email: parsedData.data.email,
-                password: parsedData.data.password
+                email: parsedData.data.email
             }
         })
 
         if (!user) {
             return res.status(401).json({
-                message: "Not authorized"
+                message: "User not found"
+            })
+        }
+
+        const hashCheck = await bcrypt.compare(parsedData.data.password, user.password)
+
+        if (!hashCheck) {
+            return res.status(401).json({
+                message: "Incorrect password"
             })
         }
 
@@ -78,9 +86,12 @@ app.post("/signin", async (req, res) => {
             token
         })
     } catch (error) {
-
+        res.status(400).json({
+            message: "Unable to sign in"
+        })
     }
 })
+
 app.post("/room", middleware, (req, res) => {
     const data = CreateRoomSchema.safeParse(req.body)
     if (!data.success) {
@@ -88,6 +99,7 @@ app.post("/room", middleware, (req, res) => {
             message: "Incorrect inputs"
         })
     }
+
     return res.json({
         roomId: 123
     })
