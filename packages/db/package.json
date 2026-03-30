@@ -4,11 +4,6 @@
   "exports": {
     "./client": "./src/index.ts"
   },
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/pg": "^8.20.0",
