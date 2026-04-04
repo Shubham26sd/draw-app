@@ -6,9 +6,15 @@ import { JWT_SECRET } from "@repo/backend-common/config"
 import { CreateRoomSchema, CreateUserSchema, SigninSchema } from "@repo/common/types"
 import { prismaClient } from "@repo/db/client"
 import bcrypt, { hash } from "bcrypt"
+import cors from "cors"
+
 
 
 const app = express();
+
+app.use(cors({
+    origin: "http://localhost:3000"
+}))
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
@@ -149,6 +155,36 @@ app.get("/room/:slug", async (req, res) => {
     return res.json({
         room
     })
+})
+
+app.get("/me", middleware, async (req, res) => {
+    if (!req.userId) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        })
+    }
+
+    try {
+        const user = await prismaClient.user.findUnique({
+            where: {
+                id: req.userId
+            }
+        })
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found, Please sign in again"
+            })
+        }
+
+        return res.json({
+            username: user.name,
+            email: user.email
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Something went wrong"
+        })
+    }
 })
 
 app.listen(3001);

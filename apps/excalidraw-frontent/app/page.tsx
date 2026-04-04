@@ -1,7 +1,35 @@
+"use client"
+import { BACKEND_URL } from "@/config"
 import { Button } from "@repo/ui/button"
 import { Card } from "@repo/ui/card"
+import axios from "axios"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function LandingPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+
+    if (!token) {
+      router.push("/signin")
+      return
+    }
+
+    axios
+      .get(`${BACKEND_URL}/me`, {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      })
+      .catch(() => {
+        localStorage.removeItem("token")
+        router.push("/signin")
+      })
+  }, [])
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navbar */}
@@ -30,8 +58,12 @@ export default function LandingPage() {
         </p>
 
         <div className="mt-8 flex gap-4">
-          <Button>Start Drawing</Button>
-          <Button variant="secondary">View Demo</Button>
+          <Link href={"/signup"}>
+            <Button>Sign Up</Button>
+          </Link>
+          <Link href={"/signin"}>
+            <Button variant="secondary">Sign In</Button>
+          </Link>
         </div>
       </section>
 

@@ -1,8 +1,19 @@
 @import "tailwindcss";
+/* 👇 tell Tailwind to scan external files */
+@source "./../../../packages/**/*.{ts,tsx}";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+canvas {
+  /* all four are needed to support the most browsers */
+  /* background-color: white; */
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 @theme inline {

@@ -20,12 +20,12 @@ export const Button = ({
 
   const variants = {
     primary: "bg-white text-black hover:scale-105 ",
-    secondary: "border border-gray-600 hover:bg-white hover:text-black",
+    secondary: "border bg-black border-gray-600 hover:bg-white hover:text-black",
   }
 
   return (
     <button
-      className={`${base} ${variants[variant]} ${className} hover:bg-red-500`}
+      className={`${base} ${variants[variant]} ${className}`}
       onClick={onClick}
     >
       {children}
