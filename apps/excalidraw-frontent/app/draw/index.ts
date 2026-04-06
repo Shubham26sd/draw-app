@@ -29,7 +29,6 @@ export async function initDraw(canvas: HTMLCanvasElement, roomId: string, socket
 
         if (message.type == "chat") {
             const parsedShape = message.message
-            console.log(message);
             existingShapes.push(parsedShape)
             clearCanvas(existingShapes, canvas, ctx)
         }
@@ -68,13 +67,13 @@ export async function initDraw(canvas: HTMLCanvasElement, roomId: string, socket
             height: y - startY
         };
 
-        existingShapes.push(shape)
+        // existingShapes.push(shape)
         socket.send(JSON.stringify({
             type: "chat",
             message: shape,
             roomId
         }))
-
+        console.log(existingShapes);
     })
 
     canvas.addEventListener("mousemove", (e) => {
@@ -109,8 +108,12 @@ async function getExistingShapes(roomId: string) {
     const messages = res.data.messages;
     // array of chats message:{"type":"rect",....}
 
-    const shapes = messages.map((message) => {
-        const messageData = JSON.parse(message.message!)
+    const shapes = messages.map((message: {
+        type: "chat";
+        message: string;
+        roomId: string;
+    }) => {
+        const messageData = JSON.parse(message.message)
         return messageData
     })
 
