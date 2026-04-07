@@ -71,7 +71,9 @@ function TopBar({
 }) {
   return (
     <div className="fixed top-3 left-1/2 -translate-x-1/2">
-      <div className="flex gap-2">
+      <div className="absolute -z-10 bg-gray-400/20 p-2 rounded-full h-full w-full border border-white/50 blur-[3px] "></div>
+
+      <div className="flex gap-2 p-2 rounded-full">
         <IconButton
           activated={selectedTool == "pencil"}
           icon={<Pencil />}

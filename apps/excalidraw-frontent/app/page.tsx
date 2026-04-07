@@ -94,9 +94,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="px-6 py-24 text-center">
         <h2 className="text-4xl font-bold">Start creating today</h2>
-        <p className="mt-4 text-gray-400">
-          No signup required. Just open and draw.
-        </p>
+        <p className="mt-4 text-gray-400">Just Signup, open and draw.</p>
 
         <div className="mt-8">
           <Button>Launch App</Button>
