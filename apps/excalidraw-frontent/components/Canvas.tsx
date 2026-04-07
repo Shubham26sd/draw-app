@@ -46,6 +46,7 @@ export function Canvas({
     if (canvasRef.current) {
       const g = new Game(canvasRef.current, roomId, socket)
       setGame(g)
+      game?.clearCanvas()
 
       return () => {
         g.destroy()
@@ -69,7 +70,7 @@ function TopBar({
   setSelectedTool: (s: Tool) => void
 }) {
   return (
-    <div className="fixed top-0 left-1/2 -translate-x-1/2">
+    <div className="fixed top-3 left-1/2 -translate-x-1/2">
       <div className="flex gap-2">
         <IconButton
           activated={selectedTool == "pencil"}

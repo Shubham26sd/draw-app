@@ -18,6 +18,12 @@ type Shape = {
     startY: number,
     endX: number,
     endY: number
+} | {
+    type: "pencil",
+    coords: {
+        x: number,
+        y: number
+    }[]
 }
 
 
@@ -31,7 +37,8 @@ export class Game {
     private clicked: boolean
     private startX: number = 0
     private startY: number = 0
-    private selectedTool: Tool = "circle"
+    private selectedTool: Tool = "rect"
+    private coordinates: { x: number, y: number }[]
 
     constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket) {
         this.canvas = canvas
@@ -40,6 +47,7 @@ export class Game {
         this.clicked = false
         this.ctx = this.canvas.getContext("2d")!
         this.existingShapes = []
+        this.coordinates = []
         this.init()
         this.initHandlers();
         this.initMouseHandlers()
@@ -87,6 +95,18 @@ export class Game {
                 this.ctx.lineTo(shape.endX, shape.endY);
                 this.ctx.stroke();
             }
+            else if (shape.type == "pencil") {
+                if (shape.coords.length < 2) return
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(shape.coords[0].x, shape.coords[0].y);
+
+                shape.coords.map((coords) => {
+                    this.ctx.lineTo(coords.x, coords.y);
+                })
+                this.ctx.stroke();
+
+            }
         })
     }
 
@@ -123,11 +143,17 @@ export class Game {
                 endX: this.startX + width,
                 endY: this.startY + height
             }
+        } else if (this.selectedTool == "pencil") {
+            shape = {
+                type: this.selectedTool,
+                coords: this.coordinates
+            }
+            this.coordinates = []
         }
 
         if (!shape) return
 
-        this.existingShapes.push(shape)
+        // this.existingShapes.push(shape)
 
         this.socket.send(JSON.stringify({
             type: "chat",
@@ -140,6 +166,14 @@ export class Game {
         this.clicked = true
         this.startX = e.clientX
         this.startY = e.clientY
+
+        if (this.selectedTool == "pencil") {
+
+            this.coordinates = []
+
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.startX, this.startY);
+        }
     }
 
     mouseMoveHandler = (e: MouseEvent) => {
@@ -147,7 +181,9 @@ export class Game {
             const width = e.clientX - this.startX
             const height = e.clientY - this.startY
 
-            this.clearCanvas()
+            if (this.selectedTool !== "pencil") {
+                this.clearCanvas()
+            }
             this.ctx.strokeStyle = "rgba(255,255,255,1)"
             const selectedTool = this.selectedTool
 
@@ -167,6 +203,14 @@ export class Game {
                 const endY = this.startY + height
                 this.ctx.moveTo(this.startX, this.startY);
                 this.ctx.lineTo(endX, endY);
+                this.ctx.stroke()
+            }
+            else if (selectedTool == "pencil") {
+                const x = e.clientX
+                const y = e.clientY
+
+                this.coordinates.push({ x, y })
+                this.ctx.lineTo(x, y)
                 this.ctx.stroke()
             }
         }
