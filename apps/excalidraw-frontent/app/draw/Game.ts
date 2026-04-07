@@ -13,7 +13,7 @@ type Shape = {
     centerY: number,
     radius: number
 } | {
-    type: "pencil",
+    type: "line",
     startX: number,
     startY: number,
     endX: number,
@@ -81,6 +81,12 @@ export class Game {
                 this.ctx.arc(shape.centerX, shape.centerY, Math.abs(shape.radius), 0, Math.PI * 2)
                 this.ctx.stroke();
             }
+            else if (shape.type == "line") {
+                this.ctx.beginPath()
+                this.ctx.moveTo(shape.startX, shape.startY);
+                this.ctx.lineTo(shape.endX, shape.endY);
+                this.ctx.stroke();
+            }
         })
     }
 
@@ -90,8 +96,6 @@ export class Game {
         const height = e.clientY - this.startY
 
         let shape: Shape | null = null
-
-
 
         if (this.selectedTool == "rect") {
             shape = {
@@ -110,6 +114,15 @@ export class Game {
                 centerY: this.startY + radius,
                 radius
             };
+        }
+        else if (this.selectedTool == "line") {
+            shape = {
+                type: this.selectedTool,
+                startX: this.startX,
+                startY: this.startY,
+                endX: this.startX + width,
+                endY: this.startY + height
+            }
         }
 
         if (!shape) return
@@ -137,6 +150,7 @@ export class Game {
             this.clearCanvas()
             this.ctx.strokeStyle = "rgba(255,255,255,1)"
             const selectedTool = this.selectedTool
+
             if (selectedTool == "rect") {
                 this.ctx.strokeRect(this.startX, this.startY, width, height)
             }
@@ -147,6 +161,13 @@ export class Game {
                 this.ctx.beginPath();
                 this.ctx.arc(centerX, centerY, Math.abs(radius), 0, Math.PI * 2)
                 this.ctx.stroke();
+            }
+            else if (selectedTool == "line") {
+                const endX = this.startX + width
+                const endY = this.startY + height
+                this.ctx.moveTo(this.startX, this.startY);
+                this.ctx.lineTo(endX, endY);
+                this.ctx.stroke()
             }
         }
     }
