@@ -29,5 +29,9 @@ export default function RoomCanvas({ roomId }: { roomId: string }) {
     )
   }
 
-  return <Canvas roomId={roomId} socket={socket} />
+  return (
+    <div>
+      <Canvas roomId={roomId} socket={socket} />
+    </div>
+  )
 }
