@@ -1,4 +1,4 @@
-# Draw App (Excalidraw Clone)
+# Collaborative Draw App
 
 A collaborative whiteboard app built as a Turborepo monorepo.
 
