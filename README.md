@@ -1,159 +1,144 @@
-# Turborepo starter
+# Draw App (Excalidraw Clone)
 
-This Turborepo starter is maintained by the Turborepo core team.
+A collaborative whiteboard app built as a Turborepo monorepo.
 
-## Using this example
+## Tech Stack
 
-Run the following command:
+- Frontend: Next.js (`apps/excalidraw-frontent`)
+- HTTP API: Express + JWT (`apps/http-backend`)
+- Realtime: WebSocket (`apps/ws-backend`)
+- Database: PostgreSQL + Prisma (`packages/db`)
+- Shared packages: `@repo/ui`, `@repo/common`, `@repo/backend-common`
 
-```sh
-npx create-turbo@latest
+## Monorepo Structure
+
+- `apps/excalidraw-frontent`: main product UI
+- `apps/http-backend`: auth + room + chat history APIs
+- `apps/ws-backend`: realtime room messaging
+- `packages/db`: Prisma schema + client
+- `packages/ui`: shared UI components
+- `packages/common`: shared zod schemas/types
+- `packages/backend-common`: backend shared config (JWT secret)
+
+## Prerequisites
+
+- Node.js 18+
+- pnpm (repo uses `pnpm@9`)
+- PostgreSQL database
+
+## Environment Variables
+
+Create env files where needed (or set these via your deployment platform):
+
+### Root / Backends / DB package
+
+Used by HTTP backend, WS backend, and Prisma package:
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DB_NAME
+JWT_SECRET=your-strong-secret
 ```
 
-## What's inside?
+### Frontend (`apps/excalidraw-frontent`)
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_WS_URL=ws://localhost:8080
 ```
 
-Without global `turbo`, use your package manager:
+## Install Dependencies
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+pnpm install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Database Setup (Prisma)
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+Run Prisma migrations from the `packages/db` package:
 
-```sh
-turbo build --filter=docs
+```bash
+pnpm --dir packages/db exec prisma migrate dev
 ```
 
-Without global `turbo`:
+To regenerate Prisma client after schema changes:
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```bash
+pnpm --dir packages/db exec prisma generate
 ```
 
-### Develop
+## Run the App Locally
 
-To develop all apps and packages, run the following command:
+You can run everything with turbo:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+```bash
+pnpm dev
 ```
 
-Without global `turbo`, use your package manager:
+Or run services individually:
 
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```bash
+pnpm --filter excalidraw-frontent dev
+pnpm --filter http-backend dev
+pnpm --filter ws-backend dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Expected local ports:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+- Frontend: `http://localhost:3000`
+- HTTP backend: `http://localhost:3001`
+- WS backend: `ws://localhost:8080`
 
-```sh
-turbo dev --filter=web
+## Build and Lint
+
+From repo root:
+
+```bash
+pnpm build
+pnpm lint
+pnpm check-types
 ```
 
-Without global `turbo`:
+Run only frontend lint:
 
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```bash
+pnpm --filter excalidraw-frontent lint
 ```
 
-### Remote Caching
+## API Overview
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+HTTP backend endpoints:
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+- `POST /signup`
+- `POST /signin`
+- `POST /room` (auth required)
+- `GET /room/:slug`
+- `GET /chats/:roomId`
+- `GET /me` (auth required)
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+WebSocket message types:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+- `join_room`
+- `leave_room`
+- `chat`
 
-```sh
-cd my-turborepo
-turbo login
-```
+## Free Deployment Recommendation
 
-Without global `turbo`, use your package manager:
+For this architecture:
 
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+- Deploy frontend (`apps/excalidraw-frontent`) on Vercel
+- Deploy `http-backend` + `ws-backend` on Render or Railway
+- Use Neon or Supabase for free PostgreSQL
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Set production env vars:
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+- Frontend:
+  - `NEXT_PUBLIC_BACKEND_URL=https://your-http-service-url`
+  - `NEXT_PUBLIC_WS_URL=wss://your-ws-service-url`
+- Backends:
+  - `DATABASE_URL`
+  - `JWT_SECRET`
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## Notes
 
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- Free tiers may sleep after inactivity, so first request/websocket connection can be slow.
+- The app/package name `excalidraw-frontent` is kept as-is to match the current repository naming.
