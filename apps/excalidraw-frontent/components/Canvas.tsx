@@ -39,20 +39,20 @@ export function Canvas({
   //canvas redraw on resize
   useEffect(() => {
     game?.clearCanvas()
-  }, [size])
+  }, [size, game])
 
   //game initialization
   useEffect(() => {
     if (canvasRef.current) {
       const g = new Game(canvasRef.current, roomId, socket)
       setGame(g)
-      game?.clearCanvas()
+      g.clearCanvas()
 
       return () => {
         g.destroy()
       }
     }
-  }, [socket])
+  }, [socket, roomId])
 
   return (
     <div className="h-screen overflow-hidden">

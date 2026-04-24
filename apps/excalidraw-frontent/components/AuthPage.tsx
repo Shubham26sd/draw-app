@@ -55,7 +55,7 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
         }
         localStorage.removeItem("token")
       })
-  }, [])
+  }, [router])
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

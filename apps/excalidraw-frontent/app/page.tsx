@@ -4,17 +4,14 @@ import { Button } from "@repo/ui/button"
 import { Card } from "@repo/ui/card"
 import axios from "axios"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export default function LandingPage() {
-  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem("token")
-
     if (!token) {
-      router.push("/signin")
       return
     }
 
@@ -24,9 +21,12 @@ export default function LandingPage() {
           Authorization: "Bearer " + token,
         },
       })
+      .then(() => {
+        setIsAuthenticated(true)
+      })
       .catch(() => {
         localStorage.removeItem("token")
-        router.push("/signin")
+        setIsAuthenticated(false)
       })
   }, [])
 
@@ -42,7 +42,15 @@ export default function LandingPage() {
           <a href="#about" className="hover:text-gray-300">
             About
           </a>
-          <Button variant="primary">Try Now</Button>
+          {isAuthenticated ? (
+            <Link href="/create-room">
+              <Button variant="primary">Create Room</Button>
+            </Link>
+          ) : (
+            <Link href="/signin">
+              <Button variant="primary">Try Now</Button>
+            </Link>
+          )}
         </div>
       </nav>
 
@@ -57,14 +65,25 @@ export default function LandingPage() {
           wireframes, and ideas effortlessly.
         </p>
 
-        <div className="mt-8 flex gap-4">
-          <Link href={"/signup"}>
-            <Button>Sign Up</Button>
-          </Link>
-          <Link href={"/signin"}>
-            <Button variant="secondary">Sign In</Button>
-          </Link>
-        </div>
+        {isAuthenticated ? (
+          <div className="mt-8 flex gap-4">
+            <Link href="/create-room">
+              <Button>Create Room</Button>
+            </Link>
+            <Link href="/join-room">
+              <Button variant="secondary">Join Room</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-8 flex gap-4">
+            <Link href="/signup">
+              <Button>Sign Up</Button>
+            </Link>
+            <Link href="/signin">
+              <Button variant="secondary">Sign In</Button>
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Features */}
@@ -94,10 +113,27 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="px-6 py-24 text-center">
         <h2 className="text-4xl font-bold">Start creating today</h2>
-        <p className="mt-4 text-gray-400">Just Signup, open and draw.</p>
+        <p className="mt-4 text-gray-400">
+          {isAuthenticated
+            ? "Create a room or join one and start drawing."
+            : "Sign up, open a room, and start drawing."}
+        </p>
 
         <div className="mt-8">
-          <Button>Launch App</Button>
+          {isAuthenticated ? (
+            <div className="flex justify-center gap-4">
+              <Link href="/create-room">
+                <Button>Launch Create Room</Button>
+              </Link>
+              <Link href="/join-room">
+                <Button variant="secondary">Launch Join Room</Button>
+              </Link>
+            </div>
+          ) : (
+            <Link href="/signup">
+              <Button>Launch App</Button>
+            </Link>
+          )}
         </div>
       </section>
 
